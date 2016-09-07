@@ -1,59 +1,58 @@
 ## SIMP Packer manifests
 
+#### Table of Contents
+
+* [Overview](#overview)
+* [Setup](#setup)
+* [Usage](#usage)
+	* [Simple build](#simple-build)
+* [Notes](#notes)
+* [TODO](#todo)
+* [DONE](#done)
+
+### Overview
+
+[Packer](https://packer.io) configuration to build a [Vagrant](https://www.vagrantup.com/) box directly from a fresh [SIMP](https://github.com/NationalSecurityAgency/SIMP) ISO. The Vagrant boxes it builds use the [VirtualBox](https://www.virtualbox.org/wiki/Downloads) provider.
+
+
+### Setup
+NOTE:  At this time the packer executable is included in the package, we can remove it if that is bad idea.
+
+Requirements:
+  - [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+  - [Vagrant](https://www.vagrantup.com/downloads.html)
+  - SIMP ISO created from build:auto and its json file.
+
 ### Usage
-1. Tweak (or generate) the `vars.json` file with appropriate values
-2. Validate the setup
+#### Simple build
+1\. To define a test, create a test directory and include the following three files:
+      vars.json:  The *.json file from the build.auto.  Make sure it points to the 
+           location of the SIMP ISO you want to test.
+      simp_conf.yaml:  A simp_conf.yaml file with the setup you want to test.  
+      packer.profile:  A configuration file, a sample is in the sample dir.  Edit
+           this file to match your set up.  There is guidance in the sample file.
+           You can add addditional environment variables like:
+	   PACKER_CACHE_DIR - keeps ginormous tmp files out of /tmp
+	   PACKER_LOG       - if set with anything, write to a log file
+           PACKER_LOG_PATH  - the location of the log file
 
-  `~/bin/packer validate -var-file=vars.json simp.json`
+2\. Run the test: Run the script simp-packer_test.sh <full path to test directory from #1>
 
-3. Run packer
+It will run and create an output file beginning with the date in the test directory.
+All processing is in a temporary working directory created under the test directory.
 
-   `~/bin/packer build -var-file=vars.json simp.json`
+The tests is runs are all defined in simp.json.template.  It tests the following:
+1) That the build of the puppet server is successful.
+2) Puppet server is up and running and listening on the ports configured in simp_conf.yaml
+3) It verifies that FIPS is set correctly in the pre-envirinment and post simp environment according to simp_conf.yaml use_fips setting.
+4) Checks that selinux matches the simp_conf.yaml selinux::secure setting.
+ 
 
-4. Using the default values in `vars.json` a successful build should drop the new VM under `./OUTPUT`.
-
-
-### BUGS
-the vagrant post-processor writes to /tmp no matter what.  this is a problem if it's smaller than the VM image:
-```
-==> virtualbox-iso: Running post-processor: vagrant
-==> virtualbox-iso (vagrant): Creating Vagrant box for 'virtualbox' provider
-    virtualbox-iso (vagrant): Copying from artifact: OUTPUT/packer-virtualbox-iso-1454117110-disk1.vmdk
-Build 'virtualbox-iso' errored: 1 error(s) occurred:
-
-* Post-processor failed: write /tmp/packer040362584/packer-virtualbox-iso-1454117110-disk1.vmdk: no space left on device
-
-==> Some builds didn't complete successfully and had errors:
---> virtualbox-iso: 1 error(s) occurred:
-
-* Post-processor failed: write /tmp/packer040362584/packer-virtualbox-iso-1454117110-disk1.vmdk: no space left on device
-
-==> Builds finished but no artifacts were created.
-```
-
+### Notes
+- 
 
 ### TODO
-- work on `<wait10>` timings
-
-### DONE
-- ~~fix sudo tty issue~~
-- ~~put paths, credentials in `-var-` or `-var-file`~~
-
-### packer build --help
-```
-Usage: packer build [options] TEMPLATE
-
-  Will execute multiple builds in parallel as defined in the template.
-  The various artifacts created by the template will be outputted.
-
-Options:
-
-  -debug                     Debug mode enabled for builds
-  -force                     Force a build to continue if artifacts exist, deletes existing artifacts
-  -machine-readable          Machine-readable output
-  -except=foo,bar,baz        Build all builds other than these
-  -only=foo,bar,baz          Only build the given builds by name
-  -parallel=false            Disable parallelization (on by default)
-  -var 'key=value'           Variable for templates, can be used multiple times.
-  -var-file=path             JSON file containing user variables.
-```
+- test auditd settings
+- test if master is yum that yum is set up and working.
+- test if iptables is configured properly.
+- 

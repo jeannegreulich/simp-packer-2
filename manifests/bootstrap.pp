@@ -1,8 +1,14 @@
 $enable_named = true
 $enable_dhcp  = true
 $enable_ks    = true
+$mymajrel = $::operatingsystemmajrelease
 
-$rsync_path  = '/var/simp/rsync/CentOS/7'
+if $mymajrel > 6 {
+   $rsync_path  = '/var/simp/rsync/CentOS/7'
+} else {
+   $rsync_path  = '/srv/rsync'
+}
+
 $copied_path = '/var/local/simp/files'
 
 if $enable_dhcp {

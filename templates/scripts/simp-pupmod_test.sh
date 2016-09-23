@@ -4,11 +4,13 @@
 #  or what is set in the conf file
 
 # We want to make sure the puppet server is up after the reboot
-source ./functions.sh
+source /var/local/simp/scripts/functions.sh
 
 myyaml=SIMP_PACKER_simp_conf_file
 puppetconf="/etc/puppet/puppet.conf"
 
+# Wait for puppet server to start
+sleep 300
 ## Get the values set in the /etc/puppet.conf file for the ports
 master_port=`grep masterport $puppetconf | cut -f2 -d= | sed -e 's/^ *//g;s/ *$//g' | sort -u`
 echo "Master Port from ${puppetconf} is:  ${master_port}"
@@ -16,7 +18,7 @@ caport=`grep ca_port ${puppetconf} | cut -f2 -d= | sed -e 's/^ *//g;s/ *$//g' | 
 echo "CA port from ${puppetconf} is:  $caport"
 
 ## Get the values from our conf file
-get_value_lower "puppet::ca_port" $myyaml
+get_value_lower "^\"puppet::ca_port\"" $myyaml
 case $myvalue in
 "") 
    # if it is not set check for default"
@@ -26,7 +28,6 @@ case $myvalue in
    sc_ca_port=$myvalue
    ;;
 esac
-
 
 regexmaster=":${master_port}[[:space:]]*$"
 regexca=":${caport}[[:space:]]*$"
@@ -39,13 +40,8 @@ fi
 
 ## These next few lines are just debug so I can see what is
 ## actually running
-tmpfile="/tmp/`basename $0`.tempfile.`date +%y%m%d%H%M%S`"
-echo "hello Jeanne" > $tmpfile
-netstat -lp | grep java >> $tmpfile
-cat $tmpfile | echo
-rm $tmpfile
 
-netstat -lp | grep java | cut -b20-40 | grep -e "${regexmaster}"
+netstat -lp | grep java | cut -b20-40 |  grep -e "${regexmaster}"
 returnmaster=$?
 
 netstat -lp | grep java | cut -b20-40 | grep -e "${regexca}"

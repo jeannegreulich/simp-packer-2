@@ -8,7 +8,7 @@ simp_default="/etc/puppet/environments/simp/hieradata/simp_def.yaml"
 simp_conf=SIMP_PACKER_simp_conf_file
 
 fipsmode=`grep ^use_fips $simp_default | cut -f2 -d: | sed -e 's/^ *//g;s/ *$//g'| sort -u`
-sc_fipsmode=`grep ^use_fips $simp_default | cut -f2 -d: | sed -e 's/^ *//g;s/ *$//g'| sort -u`
+sc_fipsmode=`grep ^use_fips $simp_conf | cut -f2 -d: | sed -e 's/^ *//g;s/ *$//g'| sort -u`
 
 if [[ $fipsmode -ne $sc_fipsmode ]]; then
   echo "The fips mode in the config file: $sc_fipsmode does not equal the one in simp_def hiera: $fipsmode."

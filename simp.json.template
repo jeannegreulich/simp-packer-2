@@ -38,7 +38,7 @@
 ## Then set the simp password and make sure it can sudo.
 ## The simp user is used to ssh into the system and run all commands.
       "boot_command": [
-        "{{user `simp_prompt`}}{{user `disk_encrypt`}} {{user `fips`}}","<enter>",
+        "{{user `simp_prompt`}} {{user `disk_encrypt`}} {{user `fips`}}","<enter>",
         "<wait10><wait10><wait10><wait10><wait10><wait10>",
         "<wait10><wait10><wait10><wait10><wait10><wait10>",
         "<wait10><wait10><wait10><wait10><wait10><wait10>",
@@ -123,6 +123,12 @@
 ## Copy files from the host to the virtual machine for use later on
       "type": "file",
       "source": "files",
+      "destination": "/var/local/simp/"
+    },
+    {
+## Copy scripts from the host to the virtual machine for use later on
+      "type": "file",
+      "source": "scripts",
       "destination": "/var/local/simp/"
     },
     {
